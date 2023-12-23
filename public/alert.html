@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="theme-color" content="#000000"/>
+    <meta
+            name="description"
+            content="A personal finance app"
+    />
+    <link rel="manifest" href="./manifest.json"/>
+    <title>Revenue</title>
+    <link rel="stylesheet" href="./assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="./assets/css/bs-theme-overrides.css">
+
+    <style>
+        :root {
+            --rv-primary: #E14ECA;
+            --rv-hover: #E669D2;
+            --rv-active: #E669D2;
+        }
+    </style>
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body data-bs-theme="dark">
+<div class="d-flex flex-column justify-content-between p-4" style="height: 100vh">
+    <p id="message"></p>
+    <div class="d-flex flex-row justify-content-end">
+        <button class="btn btn-primary" id="submit">Ok</button>
+    </div>
+</div>
+<script>
+    let params = new URLSearchParams(location.search);
+    document.getElementById("message").innerHTML = params.get("message");
+    document.getElementById("submit").addEventListener("click", () => {
+        window.close();
+    });
+</script>
+<script src="./assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+</html>

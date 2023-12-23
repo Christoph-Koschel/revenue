@@ -1,0 +1,140 @@
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    padding: 1px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #212529;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-primary);
+}
+
+[data-bs-theme=dark] {
+    --card-bg: #27293d;
+    --white: #fff;
+}
+
+[data-bs-theme=light] {
+    --card-bg: #fdfdfd;
+    --white: #fff;
+}
+
+button.btn {
+    color: var(--white) !important;
+}
+
+table.transparent * {
+    background: inherit !important;
+}
+
+.bg-gray-dark {
+    background-color: var(--card-bg);
+}
+
+.border-left {
+    border-left: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+}
+
+.sidebar-link {
+    color: var(--white) !important;
+}
+
+.sidebar-link.active {
+    background-color: var(--bs-primary) !important;
+}
+
+.sidebar-link:not(.active):hover {
+    color: var(--rv-primary) !important;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.primary-text-hover {
+    transition: color 0.15s ease-in-out;
+}
+
+.primary-text-hover:not(.active):hover {
+    color: var(--rv-primary) !important;
+}
+
+.bi {
+    vertical-align: -0.125rem;
+    pointer-events: none;
+    fill: currentColor;
+}
+
+.page {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 100vh;
+    max-height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.page.hide {
+    display: none;
+}
+
+.pn-wrapper {
+    position: relative;
+    overflow: auto;
+}
+
+.pn-wrapper > div:not(.show) {
+    display: none !important;
+}
+
+.pn-wrapper > div {
+    margin: 1rem;
+}
+
+.pn-wrapper > div .row {
+    gap: 1rem;
+}
+
+.pn-wrapper > div .row:not(:first-child) {
+    margin-top: 1rem;
+}
+
+.db-card {
+    padding: 1rem;
+    background: var(--card-bg);
+    display: flex;
+    flex-direction: column;
+}
+
+.db-card .db-card-header {
+    margin-bottom: 0.5rem;
+}
+
+.db-card .db-card-header h3 {
+    color: var(--bs-heading-color);
+    margin-bottom: 0.75rem;
+    font-weight: 100;
+}
+
+.db-card .db-card-header h6 {
+    color: var(--bs-primary);
+    font-weight: 100;
+}
+
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.dropdown-item.active {
+    background-color: inherit !important;
+}
+
+.dropdown-item:active {
+    background-color: var(--bs-primary);
+}
+
