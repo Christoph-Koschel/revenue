@@ -8,6 +8,7 @@ import Tags from "../components/Tags";
 import Profile from "../components/Profile";
 import Settings from "../components/Settings";
 import {revenue} from "../revenue";
+import Preload from "../components/Preload";
 
 interface HomeMetadata {
     account: Account;
@@ -15,7 +16,7 @@ interface HomeMetadata {
     onLogout(): void;
 }
 
-function RenderPage(index: number, account: Account, onLogout:() => void) {
+function RenderPage(index: number, account: Account, onLogout: () => void) {
     switch (index) {
         case 0:
             return <Overview account={account}/>
@@ -38,22 +39,26 @@ export default function Home({
                                  onLogout
                              }: HomeMetadata) {
     const [page, setPage] = useState(0);
+    const [inPreload, setInPreload] = useState(revenue.hasAttribute("hsnToken"));
 
     document.body.setAttribute("data-bs-theme", revenue.getAttribute("themeMode"));
     document.body.setAttribute("style", `--rv-primary: ${revenue.getAttribute("themeColor")}; --rv-hover: ${revenue.getAttribute("themeHoverColor")}; --rv-active: ${revenue.getAttribute("themeActiveColor")}`);
 
-
     return (
         <>
-            <SVG/>
-            <div className="page">
-                <Navigation onLogout={onLogout} onChange={(i) => setPage(i)} activeItem={0}/>
-                <div className="pn-wrapper" style={{
-                    width: "calc(100% - 4.5rem)"
-                }}>
-                    {RenderPage(page, account, onLogout)}
-                </div>
-            </div>
+            {inPreload ? <Preload onFinish={() => setInPreload(false)}/> :
+                <>
+                    <SVG/>
+                    <div className="page">
+                        <Navigation onLogout={onLogout} onChange={(i) => setPage(i)} activeItem={0}/>
+                        <div className="pn-wrapper" style={{
+                            width: "calc(100% - 4.5rem)"
+                        }}>
+                            {RenderPage(page, account, onLogout)}
+                        </div>
+                    </div>
+                </>
+            }
         </>
     );
 }

@@ -30,7 +30,6 @@ export default function EntryAddForm({
               style={{
                   maxWidth: 400
               }}>
-            <input type="hidden" name="year" value="<?= $year ?>"/>
             <div className="mb-4 w-100">
                 <input className="form-control" type="text" value={description} required={true}
                        placeholder="Beschreibung" onChange={(e) => setDescription(e.target.value)}/>

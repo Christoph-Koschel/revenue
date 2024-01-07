@@ -9,10 +9,7 @@ module.exports = {
     packagerConfig: {
         asar: true,
         root: "build",
-        appBundleId: fromBuildIdentifier({
-            prod: "com.koschel.revenue",
-            beta: "com.koschel.beta.revenue"
-        }),
+        appBundleId: "com.koschel.revenue",
         win32metadata: {
             FileDescription: "Personalisierte Finanz-App"
         },
@@ -61,5 +58,5 @@ module.exports = {
             config: {},
         },
     ],
-    buildIdentifier: config.build.beta == true ? "beta" : "prod"
+    buildIdentifier: "prod"
 };

@@ -7,6 +7,7 @@ import {DataSource, SecuredDataSource} from "./data";
 import * as jdenticon from "jdenticon";
 import * as electron from "electron";
 import * as fs from "fs";
+import {throws} from "node:assert";
 
 // region METADATA
 interface AccountTable {
@@ -24,7 +25,9 @@ type AttributeKeys =
     "public_key" |
     "private_key" |
     "tag_count" |
-    "profile_picture";
+    "profile_picture" |
+    "hsnToken" |
+    "hsnRegistry";
 
 interface AttributeTable {
     key: AttributeKeys;
@@ -140,7 +143,7 @@ class InformationWrapper implements Information {
     }
 
     public getVersionType(): string {
-        return "Offline Version";
+        return revenue.hasAttribute("hsnToken") ? "Online Version" : "Offline Version";
     }
 
     public getPlatform(): string {
@@ -326,6 +329,21 @@ class RevenueWrapper implements Revenue {
         return new AccountWrapper(data as AccountTable).bind(administration);
     }
 
+    public decodeData(data: string): string | null {
+        if (!currentAccount) {
+            return null;
+        }
+        console.log(data);
+        const decrypt: Buffer = crypto.privateDecrypt({
+            key: this.getAttribute("private_key"),
+            passphrase: "top secret",
+            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+            oaepHash: "sha256"
+        }, Buffer.from(data, "base64"));
+
+        return decrypt.toString("utf-8");
+    }
+
 
     public deleteCurrentAccount(): void {
         if (!currentAccount) {
@@ -378,9 +396,34 @@ class RevenueWrapper implements Revenue {
             this.setAttribute("themeActiveColor", active.hex("rgba"));
         }
 
-        currentAccount.update<AttributeTable>("attributes", (item) => item.key == name, {
+        const effected: number = currentAccount.update<AttributeTable>("attributes", (item) => item.key == name, {
             value: value
         });
+        console.log(name, effected);
+        if (effected == 0) {
+            currentAccount.getEntries<AttributeTable>("attributes").push({
+                key: name,
+                value: value
+            });
+        }
+        currentAccount.save();
+    }
+
+    public hasAttribute(name: AttributeKeys): boolean {
+        if (!currentAccount) {
+            return false;
+        }
+
+        let ele: AttributeTable = currentAccount.getEntries<AttributeTable>("attributes").find(row => row.key == name)
+        return !!ele;
+    }
+
+    public removeAttribute(name: AttributeKeys): void {
+        if (!currentAccount) {
+            return;
+        }
+
+        currentAccount.remove<AttributeTable>("attributes", row => row.key == name);
         currentAccount.save();
     }
 
@@ -388,12 +431,12 @@ class RevenueWrapper implements Revenue {
         return currentAccount?.getEntries<TagTable>("tags") || [];
     }
 
-    public sumTag(id: number): number {
+    public sumTag(id: number, year: number): number {
         if (!currentAccount) {
             return 0;
         }
 
-        return currentAccount.getEntries<EntryTable>("entries").filter(entry => entry.tag == id).map(entry => entry.value).reduce((a, b) => a + b, 0);
+        return currentAccount.getEntries<EntryTable>("entries").filter(entry => entry.tag == id && entry.year == year).map(entry => entry.value).reduce((a, b) => a + b, 0);
     }
 
     public getEntriesByTag(id: number, year: number): EntryTable[] {
@@ -428,6 +471,17 @@ class RevenueWrapper implements Revenue {
             year: date.getFullYear(),
             month: date.getMonth() + 1,
             day: date.getDate()
+        });
+        currentAccount.save();
+    }
+
+    public removeEntry(entry: EntryTable): void {
+        if (!currentAccount) {
+            return;
+        }
+
+        currentAccount.remove<EntryTable>("entries", row => {
+            return row == entry;
         });
         currentAccount.save();
     }
@@ -518,6 +572,8 @@ export interface Revenue {
 
     createAccount(data: Partial<AccountTable>): Account;
 
+    decodeData(data: string): string | null;
+
     deleteCurrentAccount(): void
 
     login(email: string, password: string): Account | string;
@@ -530,15 +586,21 @@ export interface Revenue {
 
     setAttribute(name: AttributeKeys, value: string): void
 
+    hasAttribute(name: AttributeKeys): boolean
+
+    removeAttribute(name: AttributeKeys): void;
+
     getTags(): TagTable[];
 
-    sumTag(id: number): number;
+    sumTag(id: number, year: number): number;
 
     getEntriesByTag(id: number, year: number): EntryTable[]
 
     createYear(): number;
 
     createEntry(description: string, value: number, tag: number, date: Date): void;
+
+    removeEntry(entry: EntryTable): void
 
     createTag(name: string, income: boolean): void;
 

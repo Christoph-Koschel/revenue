@@ -48,9 +48,11 @@ export class DataSource {
         return this.data[name];
     }
 
-    public update<T extends {}>(name: string, where: WhereCallback<T>, update: Partial<T>): void {
+    public update<T extends {}>(name: string, where: WhereCallback<T>, update: Partial<T>): number {
+        let effected: number = 0;
         this.data[name] = this.getEntries<T>(name).map((item: T, index: number) => {
             if (where(item, index)) {
+                effected++;
                 Object.keys(update).forEach(key => {
                     item[key] = update[key];
                 });
@@ -58,6 +60,7 @@ export class DataSource {
 
             return item;
         });
+        return effected;
     }
 
     public remove<T extends {}>(name: string, where: WhereCallback<T>): void {

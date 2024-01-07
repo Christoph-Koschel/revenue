@@ -14,6 +14,7 @@ export default function DashboardPanel({
                                            active
                                        }: DashboardPanelMetadata) {
     const [updateCount, updateState] = useState(0);
+    const [activeTab, setActiveTab] = useState(0);
 
     Chart.register(
         CategoryScale,
@@ -137,23 +138,23 @@ export default function DashboardPanel({
                             {revenue.getTags().map(tag => (
                                 <tr>
                                     <td>{tag.name}</td>
-                                    <td>{revenue.sumTag(tag.id) * (tag.income ? 1 : -1)}€</td>
+                                    <td>{(revenue.sumTag(tag.id, year) * (tag.income ? 1 : -1)).toFixed(2)}€</td>
                                 </tr>
                             ))}
                             <tr className="pt-2">
                                 <td><b>TOTAL</b></td>
                                 <td>
-                                    {((): number => {
-                                        let total = 0;
+                                    {((): string => {
+                                        let total: number = 0;
                                         revenue.getTags().forEach(tag => {
                                             if (tag.income) {
-                                                total += revenue.sumTag(tag.id);
+                                                total += revenue.sumTag(tag.id, year);
                                             } else {
-                                                total += -revenue.sumTag(tag.id);
+                                                total += -revenue.sumTag(tag.id, year);
                                             }
                                         });
 
-                                        return total;
+                                        return total.toFixed(2);
                                     })()}
                                     €
                                 </td>
@@ -169,8 +170,8 @@ export default function DashboardPanel({
                         <ul className="nav nav-tabs" role="tablist">
                             {revenue.getTags().map((tag, index) => (
                                 <li className="nav-item" role="presentation">
-                                    <a className={"nav-link" + (index == 0 ? " active" : "")} role="tab"
-                                       data-bs-toggle="tab" href={"#tags-details-" + tag.id}>
+                                    <a className={"nav-link pointer" + (index == activeTab ? " active" : "")} role="tab"
+                                       data-bs-toggle="tab" onClick={() => setActiveTab(index)}>
                                         {tag.name}
                                     </a>
                                 </li>
@@ -180,9 +181,8 @@ export default function DashboardPanel({
                             backgroundColor: "var(--bs-body-bg)"
                         }}>
                             {revenue.getTags().map((tag, index) => (
-                                <div className={"tab-pane p-3" + (index == 0 ? " active show" : "")}
-                                     role="tabpanel"
-                                     id={"tags-details-" + tag.id}>
+                                <div className={"tab-pane p-3" + (index == activeTab ? " active show" : "")}
+                                     role="tabpanel">
                                     <div className="table-responsive">
                                         <table className="table transparent">
                                             <thead>
@@ -190,14 +190,28 @@ export default function DashboardPanel({
                                                 <th>Beschreibung</th>
                                                 <th>Wert</th>
                                                 <th>Datum</th>
+                                                <th style={{
+                                                    width: 0
+                                                }}></th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             {revenue.getEntriesByTag(tag.id, year).map(entry => (
                                                 <tr>
                                                     <td>{entry.description}</td>
-                                                    <td>{entry.value}€</td>
+                                                    <td>{entry.value.toFixed(2)}€</td>
                                                     <td>{entry.day.toString().padStart(2, "0") + "." + entry.month.toString().padStart(2, "0") + "." + entry.year}</td>
+                                                    <td>
+                                                        <button className="btn btn-primary btn-sm btn-outline-primary" onClick={() => {
+                                                            revenue.confirm("Wirklich Löschen?").then(r => {
+                                                                if (r) {
+                                                                    revenue.removeEntry(entry);
+                                                                    updateState(updateCount + 1);
+                                                                }
+                                                            });
+                                                        }}>Löschen
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                             ))}
                                             </tbody>

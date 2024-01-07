@@ -23,7 +23,11 @@
     --white: #fff;
 }
 
-button.btn {
+button.btn:not(.btn-outline-primary) {
+    color: var(--white) !important;
+}
+
+[data-bs-theme=dark] button.btn-outline-primary:hover {
     color: var(--white) !important;
 }
 

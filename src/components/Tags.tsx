@@ -1,10 +1,31 @@
 import {PageMetadata} from "./metadata";
-import {revenue} from "../revenue";
+import {makeRequest, RegistryReq, revenue} from "../revenue";
 import NewTagForm from "./NewTagForm";
 import {useState} from "react";
 
 interface TagsMetadata extends PageMetadata {
 
+}
+
+async function uploadData(): Promise<void> {
+    if (!revenue.hasAttribute("hsnToken") || !revenue.hasAttribute("hsnRegistry")) {
+        return;
+    }
+
+    const registry: RegistryReq = await makeRequest(`https://hexa-studio.de:8443/api/select/revenue.registry/${revenue.getAttribute("hsnRegistry")}`, revenue.getAttribute("hsnToken"));
+    if (registry.code != 200) {
+        return;
+    }
+    await makeRequest(`https://hexa-studio.de:8443/api/update/revenue.registry.detail/${registry.data[0].detail}`, revenue.getAttribute("hsnToken"), {
+        data: {
+            tags: revenue.getTags()
+        }
+    });
+    await makeRequest(`https://hexa-studio.de:8443/api/update/revenue.registry/${revenue.getAttribute("hsnRegistry")}`, revenue.getAttribute("hsnToken"), {
+        data: {
+            revision: registry.data[0].revision + 1
+        }
+    });
 }
 
 export default function Tags({}: TagsMetadata) {
@@ -30,6 +51,7 @@ export default function Tags({}: TagsMetadata) {
                     <NewTagForm onSubmit={(name, income) => {
                         revenue.createTag(name, income);
                         setTags([...revenue.getTags()]);
+                        uploadData();
                     }}/>
                 </div>
                 <div className="col shadow rounded-2 db-card">
@@ -58,6 +80,7 @@ export default function Tags({}: TagsMetadata) {
                                 revenue.confirm("Möchten Sie den Tag wirklich Löschen und damit alle gebundenen Einträge").then(e => {
                                     if (e) {
                                         revenue.removeTag(tag.id);
+                                        uploadData();
                                         setTags(revenue.getTags());
                                     }
                                 });
